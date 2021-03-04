@@ -1,0 +1,2 @@
+defmodule Muster do
+end
