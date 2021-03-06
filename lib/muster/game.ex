@@ -12,6 +12,7 @@ defmodule Muster.Game do
 
   @grid_size 6
   @first_tile 2
+  @new_tile 1
 
   @spec new() :: t()
   def new() do
@@ -25,6 +26,11 @@ defmodule Muster.Game do
 
   @spec move(t(), direction()) :: t()
   def move(%__MODULE__{} = game, direction) do
-    %__MODULE__{grid: Grid.move_tiles(game.grid, direction)}
+    grid =
+      game.grid
+      |> Grid.move_tiles(direction)
+      |> Grid.put_tile_in_random_space(@new_tile)
+
+    %{game | grid: grid}
   end
 end

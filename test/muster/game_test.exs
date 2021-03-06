@@ -28,7 +28,7 @@ defmodule Muster.GameTest do
   end
 
   describe "move/2" do
-    test "moves tiles in the passed direction" do
+    test "moves tiles and adds a tile of value 1" do
       game = %Game{
         grid: [
           [nil, 1, nil, 2, nil, nil],
@@ -42,14 +42,43 @@ defmodule Muster.GameTest do
 
       %{grid: grid} = Game.move(game, :left)
 
-      assert grid == [
-               [1, 2, nil, nil, nil, nil],
-               [2, 1, nil, nil, nil, nil],
-               [2, 3, nil, nil, nil, nil],
-               [6, 6, nil, nil, nil, nil],
-               [nil, nil, nil, nil, nil, nil],
-               [1, 2, nil, nil, nil, nil]
-             ]
+      expected_grid = [
+        [1, 2, nil, nil, nil, nil],
+        [2, 1, nil, nil, nil, nil],
+        [2, 3, nil, nil, nil, nil],
+        [6, 6, nil, nil, nil, nil],
+        [nil, nil, nil, nil, nil, nil],
+        [1, 2, nil, nil, nil, nil]
+      ]
+
+      Enum.each(0..5, fn i ->
+        Enum.each(0..5, fn j ->
+          expected_cell = get_in_grid(expected_grid, i, j)
+          cell = get_in_grid(grid, i, j)
+
+          if is_nil(expected_cell) do
+            assert is_nil(cell) || cell == 1, "Expected nil or 1 at #{i}:#{j}, got: #{cell}"
+          else
+            assert cell == expected_cell, "Wrong cell at #{i}:#{j}"
+          end
+        end)
+      end)
+
+      expected_spaces =
+        expected_grid
+        |> List.flatten()
+        |> Enum.count(&is_nil/1)
+
+      spaces =
+        grid
+        |> List.flatten()
+        |> Enum.count(&is_nil/1)
+
+      assert spaces == expected_spaces - 1, "Wrong number of spaces left"
     end
+  end
+
+  defp get_in_grid(grid, i, j) do
+    get_in(grid, [Access.at(i), Access.at(j)])
   end
 end
