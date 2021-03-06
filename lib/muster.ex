@@ -1,11 +1,18 @@
 defmodule Muster do
   @type tile :: pos_integer
   @type row :: [tile() | nil]
-  @type direction :: :left
+  @type direction :: :left | :right
 
   @spec move_tiles([row()], direction()) :: [row()]
   def move_tiles(grid, :left) do
     Enum.map(grid, &move_tiles/1)
+  end
+
+  def move_tiles(grid, :right) do
+    grid
+    |> Enum.map(&Enum.reverse/1)
+    |> move_tiles(:left)
+    |> Enum.map(&Enum.reverse/1)
   end
 
   @spec move_tiles(row()) :: row()
