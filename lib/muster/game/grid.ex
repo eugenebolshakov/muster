@@ -5,6 +5,38 @@ defmodule Muster.Game.Grid do
   @type row :: [Game.tile() | nil]
   @type t :: [row()]
 
+  @spec new(size :: pos_integer) :: t()
+  def new(size) do
+    nil
+    |> List.duplicate(size)
+    |> List.duplicate(size)
+  end
+
+  @spec put_tile_in_random_space(t(), tile()) :: t()
+  def put_tile_in_random_space(grid, tile) do
+    random_index =
+      grid
+      |> list_spaces()
+      |> Enum.random()
+
+    put_tile_at(grid, tile, random_index)
+  end
+
+  defp list_spaces(grid) do
+    grid
+    |> List.flatten()
+    |> Enum.with_index()
+    |> Enum.filter(fn {cell, _i} -> is_nil(cell) end)
+    |> Enum.map(fn {nil, i} -> i end)
+  end
+
+  defp put_tile_at(grid, tile, index) do
+    grid_size = length(grid)
+    i = div(index, grid_size)
+    j = Integer.mod(index, grid_size)
+    put_in(grid, [Access.at(i), Access.at(j)], tile)
+  end
+
   @spec move_tiles(t(), Game.direction()) :: t()
   def move_tiles(grid, :left) do
     Enum.map(grid, &move_tiles/1)

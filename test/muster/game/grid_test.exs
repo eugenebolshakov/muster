@@ -3,6 +3,58 @@ defmodule Muster.Game.GridTest do
 
   alias Muster.Game.Grid
 
+  describe "new/1" do
+    test "returns an empty grid of given size" do
+      assert Grid.new(2) == [
+               [nil, nil],
+               [nil, nil]
+             ]
+
+      assert Grid.new(3) == [
+               [nil, nil, nil],
+               [nil, nil, nil],
+               [nil, nil, nil]
+             ]
+    end
+  end
+
+  describe "put_tile_in_random_space/2" do
+    test "puts tile into an empty space" do
+      assert Grid.put_tile_in_random_space([[nil]], 1) == [[1]]
+
+      grid = [
+        [1, 2],
+        [3, nil]
+      ]
+
+      assert Grid.put_tile_in_random_space(grid, 4) == [
+               [1, 2],
+               [3, 4]
+             ]
+    end
+
+    test "puts tile into a random space" do
+      grid = Grid.new(3)
+
+      tile_locations =
+        0..5
+        |> Enum.map(fn _ ->
+          grid = Grid.put_tile_in_random_space(grid, 1)
+
+          elements = List.flatten(grid)
+          assert length(elements) == 9
+
+          assert Enum.count(elements, &(&1 == 1)) == 1
+          assert Enum.count(elements, &is_nil/1) == 8
+
+          Enum.find_index(elements, &(&1 == 1))
+        end)
+        |> Enum.uniq()
+
+      assert length(tile_locations) > 1, "Tile placed in the same location 5 times"
+    end
+  end
+
   describe "move_tiles/2" do
     @grid [
       [nil, 1, 1],

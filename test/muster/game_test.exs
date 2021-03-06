@@ -16,23 +16,14 @@ defmodule Muster.GameTest do
       end)
     end
 
-    test "places a tile of value 2 in a random space" do
-      tile_locations =
-        0..5
-        |> Enum.map(fn _ ->
-          %{grid: grid} = Game.new()
+    test "returns a grid with a single tile of value 2" do
+      %{grid: grid} = Game.new()
 
-          elements = List.flatten(grid)
-          assert length(elements) == 36
+      elements = List.flatten(grid)
+      assert length(elements) == 36
 
-          assert Enum.count(elements, &(&1 == 2)) == 1
-          assert Enum.count(elements, &is_nil/1) == 35
-
-          Enum.find_index(elements, &(&1 == 2))
-        end)
-        |> Enum.uniq()
-
-      assert length(tile_locations) > 1, "Tile placed in the same location 5 times"
+      assert Enum.count(elements, &(&1 == 2)) == 1
+      assert Enum.count(elements, &is_nil/1) == 35
     end
   end
 
