@@ -1,7 +1,11 @@
 defmodule Muster.Game do
+  alias Muster.Game.Grid
+
   @type t :: %__MODULE__{
-          grid: [Muster.row()]
+          grid: Grid.t()
         }
+
+  @type direction :: :left | :right | :up | :down
 
   @enforce_keys [:grid]
   defstruct [:grid]
@@ -41,5 +45,10 @@ defmodule Muster.Game do
     i = div(index, @grid_size)
     j = Integer.mod(index, @grid_size)
     put_in(grid, [Access.at(i), Access.at(j)], tile)
+  end
+
+  @spec move(t(), direction()) :: t()
+  def move(%__MODULE__{} = game, direction) do
+    %__MODULE__{grid: Grid.move_tiles(game.grid, direction)}
   end
 end
