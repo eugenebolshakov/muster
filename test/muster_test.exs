@@ -31,6 +31,14 @@ defmodule MusterTest do
                [nil, nil, nil]
              ]
     end
+
+    test "moves tiles in a grid down" do
+      assert Muster.move_tiles(@grid, :down) == [
+               [nil, nil, nil],
+               [nil, nil, 2],
+               [1, 1, 2]
+             ]
+    end
   end
 
   describe "move_tiles/1" do

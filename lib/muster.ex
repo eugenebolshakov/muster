@@ -1,7 +1,7 @@
 defmodule Muster do
   @type tile :: pos_integer
   @type row :: [tile() | nil]
-  @type direction :: :left | :right | :up
+  @type direction :: :left | :right | :up | :down
 
   @spec move_tiles([row()], direction()) :: [row()]
   def move_tiles(grid, :left) do
@@ -10,15 +10,24 @@ defmodule Muster do
 
   def move_tiles(grid, :right) do
     grid
-    |> Enum.map(&Enum.reverse/1)
+    |> reverse_columns()
     |> move_tiles(:left)
-    |> Enum.map(&Enum.reverse/1)
+    |> reverse_columns()
   end
 
   def move_tiles(grid, :up) do
     grid
     |> transpose_grid()
     |> move_tiles(:left)
+    |> transpose_grid()
+  end
+
+  def move_tiles(grid, :down) do
+    grid
+    |> transpose_grid()
+    |> reverse_columns()
+    |> move_tiles(:left)
+    |> reverse_columns()
     |> transpose_grid()
   end
 
@@ -52,5 +61,9 @@ defmodule Muster do
         get_in(grid, [Access.at(j), Access.at(i)])
       end)
     end)
+  end
+
+  defp reverse_columns(grid) do
+    Enum.map(grid, &Enum.reverse/1)
   end
 end
