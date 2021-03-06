@@ -2,31 +2,33 @@ defmodule MusterTest do
   use ExUnit.Case
 
   describe "move_tiles/2" do
-    test "moves tiles in a grid to the left" do
-      grid = [
-        [nil, 1, 1],
-        [nil, nil, 1],
-        [1, nil, 2]
-      ]
+    @grid [
+      [nil, 1, 1],
+      [nil, nil, 1],
+      [1, nil, 2]
+    ]
 
-      assert Muster.move_tiles(grid, :left) == [
+    test "moves tiles in a grid left" do
+      assert Muster.move_tiles(@grid, :left) == [
                [2, nil, nil],
                [1, nil, nil],
                [1, 2, nil]
              ]
     end
 
-    test "moves tiles in a grid to the right" do
-      grid = [
-        [nil, 1, 1],
-        [nil, nil, 1],
-        [1, nil, 2]
-      ]
-
-      assert Muster.move_tiles(grid, :right) == [
+    test "moves tiles in a grid right" do
+      assert Muster.move_tiles(@grid, :right) == [
                [nil, nil, 2],
                [nil, nil, 1],
                [nil, 1, 2]
+             ]
+    end
+
+    test "moves tiles in a grid up" do
+      assert Muster.move_tiles(@grid, :up) == [
+               [1, 1, 2],
+               [nil, nil, 2],
+               [nil, nil, nil]
              ]
     end
   end
@@ -79,6 +81,22 @@ defmodule MusterTest do
       assert Muster.move_tiles([nil]) == [nil]
       assert Muster.move_tiles([nil, nil]) == [nil, nil]
       assert Muster.move_tiles([nil, nil, nil]) == [nil, nil, nil]
+    end
+  end
+
+  describe "transpose_grid/1" do
+    test "replaces rows with columns" do
+      grid = [
+        [1, 2, 3],
+        [4, 5, 6],
+        [7, 8, 9]
+      ]
+
+      assert Muster.transpose_grid(grid) == [
+               [1, 4, 7],
+               [2, 5, 8],
+               [3, 6, 9]
+             ]
     end
   end
 end
