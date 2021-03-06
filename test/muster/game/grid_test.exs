@@ -161,4 +161,16 @@ defmodule Muster.Game.GridTest do
              ]
     end
   end
+
+  describe "tile_present?/2" do
+    test "returns true if tile is present in the grid" do
+      refute Grid.tile_present?([[]], 1)
+      refute Grid.tile_present?([[nil]], 1)
+      refute Grid.tile_present?([[2]], 1)
+      refute Grid.tile_present?([[nil, 2], [3, nil]], 1)
+
+      assert Grid.tile_present?([[1]], 1)
+      assert Grid.tile_present?([[2, nil], [nil, 1]], 1)
+    end
+  end
 end

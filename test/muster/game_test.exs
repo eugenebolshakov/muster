@@ -25,11 +25,16 @@ defmodule Muster.GameTest do
       assert Enum.count(elements, &(&1 == 2)) == 1
       assert Enum.count(elements, &is_nil/1) == 35
     end
+
+    test "returns a game that is on" do
+      assert Game.new().status == :on
+    end
   end
 
   describe "move/2" do
     test "moves tiles and adds a tile of value 1" do
       game = %Game{
+        status: :on,
         grid: [
           [nil, 1, nil, 2, nil, nil],
           [1, 1, nil, nil, 1, nil],
@@ -76,9 +81,28 @@ defmodule Muster.GameTest do
 
       assert spaces == expected_spaces - 1, "Wrong number of spaces left"
     end
+
+    test "game is won when a tile reaches the value 2048" do
+      game = %Game{status: :on, grid: [[1024, 512, 512, nil, nil, nil]] ++ build_empty_rows(5)}
+
+      game = Game.move(game, :left)
+      assert get_in_grid(game.grid, 0, 0) == 1024
+      assert get_in_grid(game.grid, 0, 1) == 1024
+      assert game.status == :on
+
+      game = Game.move(game, :left)
+      assert get_in_grid(game.grid, 0, 0) == 2048
+      assert game.status == :won
+    end
   end
 
   defp get_in_grid(grid, i, j) do
     get_in(grid, [Access.at(i), Access.at(j)])
+  end
+
+  defp build_empty_rows(number_of_rows) do
+    nil
+    |> List.duplicate(6)
+    |> List.duplicate(number_of_rows)
   end
 end

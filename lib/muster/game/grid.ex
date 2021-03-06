@@ -100,4 +100,9 @@ defmodule Muster.Game.Grid do
   defp reverse_columns(grid) do
     Enum.map(grid, &Enum.reverse/1)
   end
+
+  @spec tile_present?(t(), tile()) :: boolean()
+  def tile_present?(grid, tile) do
+    Enum.any?(grid, fn row -> tile in row end)
+  end
 end
