@@ -1,6 +1,22 @@
 defmodule MusterTest do
   use ExUnit.Case
 
+  describe "move_tiles/2" do
+    test "moves tiles in a grid to the left" do
+      grid = [
+        [nil, 1, 1],
+        [nil, nil, 1],
+        [1, nil, 2]
+      ]
+
+      assert Muster.move_tiles(grid, :left) == [
+               [2, nil, nil],
+               [1, nil, nil],
+               [1, 2, nil]
+             ]
+    end
+  end
+
   describe "move_tiles/1" do
     test "moves tiles to the beginning" do
       assert Muster.move_tiles([1]) == [1]
