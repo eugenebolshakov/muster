@@ -105,4 +105,11 @@ defmodule Muster.Game.Grid do
   def tile_present?(grid, tile) do
     Enum.any?(grid, fn row -> tile in row end)
   end
+
+  @spec count_spaces(t()) :: integer()
+  def count_spaces(grid) do
+    grid
+    |> list_spaces
+    |> length
+  end
 end

@@ -83,7 +83,8 @@ defmodule Muster.GameTest do
     end
 
     test "game is won when a tile reaches the value 2048" do
-      game = %Game{status: :on, grid: [[1024, 512, 512, nil, nil, nil]] ++ build_empty_rows(5)}
+      grid = [[1024, 512, 512, nil, nil, nil]] ++ build_empty_rows(5)
+      game = %Game{status: :on, grid: grid}
 
       game = Game.move(game, :left)
       assert get_in_grid(game.grid, 0, 0) == 1024
@@ -93,6 +94,18 @@ defmodule Muster.GameTest do
       game = Game.move(game, :left)
       assert get_in_grid(game.grid, 0, 0) == 2048
       assert game.status == :won
+    end
+
+    test "game is lost when there is no space to add a new tile" do
+      grid = [[1, 2, 3, 4, 5, nil]] ++ List.duplicate([1, 2, 3, 4, 5, 6], 5)
+      game = %Game{status: :on, grid: grid}
+
+      game = Game.move(game, :left)
+      assert get_in_grid(game.grid, 0, 5) == 1
+      assert game.status == :on
+
+      game = Game.move(game, :left)
+      assert game.status == :lost
     end
   end
 

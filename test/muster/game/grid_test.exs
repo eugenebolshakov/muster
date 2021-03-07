@@ -173,4 +173,14 @@ defmodule Muster.Game.GridTest do
       assert Grid.tile_present?([[2, nil], [nil, 1]], 1)
     end
   end
+
+  describe "count_spaces/1" do
+    test "returns number of spaces in a grid" do
+      assert Grid.count_spaces([[]]) == 0
+      assert Grid.count_spaces([[1]]) == 0
+      assert Grid.count_spaces([[nil]]) == 1
+      assert Grid.count_spaces([[1, 2], [3, 4]]) == 0
+      assert Grid.count_spaces([[1, nil], [nil, 4]]) == 2
+    end
+  end
 end

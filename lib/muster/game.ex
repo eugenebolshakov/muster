@@ -1,7 +1,7 @@
 defmodule Muster.Game do
   alias Muster.Game.Grid
 
-  @type status :: :on | :won
+  @type status :: :on | :won | :lost
 
   @type t :: %__MODULE__{
           status: status(),
@@ -33,6 +33,7 @@ defmodule Muster.Game do
     game
     |> move_tiles(direction)
     |> check_win()
+    |> check_loss()
     |> maybe_add_new_tile()
   end
 
@@ -44,6 +45,14 @@ defmodule Muster.Game do
   defp check_win(game) do
     if Grid.tile_present?(game.grid, @winning_tile) do
       %{game | status: :won}
+    else
+      game
+    end
+  end
+
+  defp check_loss(game) do
+    if game.status == :on && Grid.count_spaces(game.grid) == 0 do
+      %{game | status: :lost}
     else
       game
     end
