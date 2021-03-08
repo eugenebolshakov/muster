@@ -25,3 +25,5 @@ muster-*.tar
 .aliases
 
 .mix
+
+Dockerfile

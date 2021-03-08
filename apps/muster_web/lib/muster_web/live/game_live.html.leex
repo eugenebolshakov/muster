@@ -1,0 +1,19 @@
+<main class="game">
+  <%= if @game && @game.status == :on do %>
+    <div class="grid" phx-window-keyup="move">
+      <%= for row <- @game.grid do %>
+        <div class="row">
+          <%= for cell <- row do %>
+            <div class="cell <%= if cell, do: "tile" %>"><%= cell %></div>
+          <% end %>
+        </div>
+      <% end %>
+    </div>
+  <% else %>
+    <%= if @game do %>
+      <p>Game is <%= @game.status %></p>
+    <% end %>
+
+    <button phx-click="start_game">New game</button>
+  <% end %>
+</div>

@@ -17,7 +17,7 @@ defmodule MusterWeb.Router do
   scope "/", MusterWeb do
     pipe_through :browser
 
-    live "/", PageLive, :index
+    live "/", GameLive, :index
   end
 
   # Other scopes may use custom stacks.

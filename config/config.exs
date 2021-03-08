@@ -9,8 +9,6 @@
 # move said applications out of the umbrella.
 use Mix.Config
 
-
-
 config :muster_web,
   generators: [context_app: :muster]
 
@@ -19,7 +17,7 @@ config :muster_web, MusterWeb.Endpoint,
   url: [host: "localhost"],
   secret_key_base: "ZdlTifqoLyyjPmZa5xXjPrKVp/LsM1/Q7dPF/dply6pjcaMVLgb9JCQMrkk+/hv2",
   render_errors: [view: MusterWeb.ErrorView, accepts: ~w(html json), layout: false],
-  pubsub_server: Muster.PubSub,
+  pubsub_server: MusterWeb.PubSub,
   live_view: [signing_salt: "mzaFLbTd"]
 
 # Configures Elixir's Logger
