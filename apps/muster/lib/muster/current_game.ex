@@ -1,6 +1,8 @@
 defmodule Muster.CurrentGame do
   use GenServer
 
+  @type server :: pid() | __MODULE__
+
   alias Muster.Game
 
   def init(nil) do
@@ -17,28 +19,35 @@ defmodule Muster.CurrentGame do
     GenServer.start_link(__MODULE__, nil, opts)
   end
 
-  @spec get() :: Game.t() | nil
-  def get() do
-    GenServer.call(__MODULE__, :get)
+  @spec get(server()) :: Game.t() | nil
+  def get(server \\ __MODULE__) do
+    GenServer.call(server, :get)
   end
 
-  @spec new() :: Game.t()
-  def new() do
-    GenServer.call(__MODULE__, :new)
+  @spec join(server()) :: {:ok, Game.t(), Game.player()} | {:error, :game_is_on}
+  def join(server \\ __MODULE__) do
+    GenServer.call(server, :join)
   end
 
-  @spec move(Game.direction()) :: Game.t()
-  def move(direction) do
-    GenServer.call(__MODULE__, {:move, direction})
+  @spec move(server(), Game.direction()) :: Game.t()
+  def move(server \\ __MODULE__, direction) do
+    GenServer.call(server, {:move, direction})
   end
 
   def handle_call(:get, _from, game) do
     {:reply, game, game}
   end
 
-  def handle_call(:new, _from, _game) do
-    game = Game.new()
-    {:reply, game, game}
+  def handle_call(:join, _from, game) do
+    game = game || Game.new()
+
+    if game.status == :waiting_for_players do
+      player = String.to_atom("player#{length(game.players) + 1}")
+      game = Game.add_player(game, player)
+      {:reply, {:ok, game, player}, game}
+    else
+      {:reply, {:error, :game_is_on}, game}
+    end
   end
 
   def handle_call({:move, direction}, _from, game) do

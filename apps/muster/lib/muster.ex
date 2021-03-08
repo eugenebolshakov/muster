@@ -6,9 +6,9 @@ defmodule Muster do
     CurrentGame.get()
   end
 
-  @spec new_game() :: Game.t()
-  def new_game() do
-    CurrentGame.new()
+  @spec join_game() :: {:ok, Game.t(), Game.player()} | {:error, :game_is_on}
+  def join_game() do
+    CurrentGame.join()
   end
 
   @spec move(Game.direction()) :: Game.t()

@@ -26,8 +26,36 @@ defmodule Muster.GameTest do
       assert Enum.count(elements, &is_nil/1) == 35
     end
 
-    test "returns a game that is on" do
-      assert Game.new().status == :on
+    test "returns a game that is waiting for players" do
+      game = Game.new()
+      assert game.status == :waiting_for_players
+    end
+  end
+
+  describe "add_player/2" do
+    test "adds the player to the list" do
+      game = Game.new
+      assert game.players == []
+
+      game = Game.add_player(game, :player1)
+      assert game.players == [:player1]
+    end
+
+    test "starts the game when 2 players are added" do
+      game = Game.new
+      assert game.players == []
+      assert game.status == :waiting_for_players
+      refute game.current_player
+
+      game = Game.add_player(game, :player1)
+      assert game.players == [:player1]
+      assert game.status == :waiting_for_players
+      refute game.current_player
+
+      game = Game.add_player(game, :player2)
+      assert game.players == [:player1, :player2]
+      assert game.status == :on
+      assert game.current_player == :player1
     end
   end
 
@@ -106,6 +134,16 @@ defmodule Muster.GameTest do
 
       game = Game.move(game, :left)
       assert game.status == :lost
+    end
+
+    test "toggles current player" do
+      game = %Game{status: :on, players: [:player1, :player2], current_player: :player1, grid: build_empty_rows(6)}
+
+      game = Game.move(game, :left)
+      assert game.current_player == :player2
+
+      game = Game.move(game, :left)
+      assert game.current_player == :player1
     end
   end
 
