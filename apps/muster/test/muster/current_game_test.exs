@@ -41,6 +41,18 @@ defmodule Muster.CurrentGameTest do
     end
   end
 
+  describe "stop/1" do
+    setup :start_game
+
+    test "stops current game", %{current_game: current_game} do
+      assert CurrentGame.get(current_game).status == :on
+
+      game = CurrentGame.stop(current_game)
+      assert game.status == :stopped
+      assert CurrentGame.get(current_game).status == :stopped
+    end
+  end
+
   defp start_game(%{current_game: current_game} = context) do
     {:ok, _, _} = CurrentGame.join(current_game)
     {:ok, %{status: :on}, _} = CurrentGame.join(current_game)

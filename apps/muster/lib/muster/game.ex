@@ -1,7 +1,7 @@
 defmodule Muster.Game do
   alias Muster.Game.Grid
 
-  @type status :: :waiting_for_players | :on | :won | :lost
+  @type status :: :waiting_for_players | :on | :won | :lost | :stopped
   @type player :: :player1 | :player2
 
   @type t :: %__MODULE__{
@@ -89,5 +89,10 @@ defmodule Muster.Game do
     else
       game
     end
+  end
+
+  @spec stop(t()) :: t()
+  def stop(%__MODULE__{} = game) do
+    %{game | status: :stopped}
   end
 end

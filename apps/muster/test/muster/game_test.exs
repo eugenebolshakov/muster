@@ -147,6 +147,14 @@ defmodule Muster.GameTest do
     end
   end
 
+  describe "stop/1" do
+    test "stops the game" do
+      game = Game.new()
+      game = Game.stop(game)
+      assert game.status == :stopped
+    end
+  end
+
   defp get_in_grid(grid, i, j) do
     get_in(grid, [Access.at(i), Access.at(j)])
   end

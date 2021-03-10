@@ -16,5 +16,9 @@ defmodule MusterTest do
     game = Muster.move(:left)
     assert game.current_player == :player2
     assert Muster.get_current_game() == game
+
+    game = Muster.stop_current_game()
+    assert game.status == :stopped
+    assert Muster.get_current_game() == game
   end
 end

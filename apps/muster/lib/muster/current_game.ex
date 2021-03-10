@@ -34,6 +34,11 @@ defmodule Muster.CurrentGame do
     GenServer.call(server, {:move, direction})
   end
 
+  @spec stop(server()) :: Game.t() | nil
+  def stop(server \\ __MODULE__) do
+    GenServer.call(server, :stop)
+  end
+
   def handle_call(:get, _from, game) do
     {:reply, game, game}
   end
@@ -52,6 +57,11 @@ defmodule Muster.CurrentGame do
 
   def handle_call({:move, direction}, _from, game) do
     game = Game.move(game, direction)
+    {:reply, game, game}
+  end
+
+  def handle_call(:stop, _from, game) do
+    game = game && Game.stop(game)
     {:reply, game, game}
   end
 end

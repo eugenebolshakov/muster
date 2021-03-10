@@ -15,4 +15,9 @@ defmodule Muster do
   def move(direction) do
     CurrentGame.move(direction)
   end
+
+  @spec stop_current_game() :: Game.t() | nil
+  def stop_current_game() do
+    CurrentGame.stop()
+  end
 end
