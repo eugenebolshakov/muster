@@ -1,19 +1,37 @@
 <main class="game">
-  <%= if @game && @game.status == :on do %>
-    <div class="grid" phx-window-keyup="move">
-      <%= for row <- @game.grid do %>
-        <div class="row">
-          <%= for cell <- row do %>
-            <div class="cell <%= if cell, do: "tile" %>"><%= cell %></div>
-          <% end %>
-        </div>
-      <% end %>
-    </div>
-  <% else %>
-    <%= if @game do %>
-      <p>Game is <%= @game.status %></p>
-    <% end %>
+  <%= if @game do %>
+    <%= cond do %>
+      <% @game.status == :waiting_for_players -> %>
+        <h1>Welcome, <%= @player %>!</h1>
+        <h2>Waiting for another player to join...</h2>
 
-    <button phx-click="start_game">New game</button>
+      <% @game.status == :on && @game.current_player == @player -> %>
+        <h1>It's your turn</h1>
+
+        <div class="grid" phx-window-keyup="move">
+          <%= render GameView, "_grid.html", assigns %>
+        </div>
+
+      <% @game.status == :on -> %>
+        <h1>It's <%= @game.current_player %>'s turn</h1>
+
+        <div class="grid">
+          <%= render GameView, "_grid.html", assigns %>
+        </div>
+
+      <% @game.status == :won -> %>
+        <h1><%= if @game.current_player == @player, do: "You", else: @game.current_player %> won!</h1>
+
+        <div class="grid">
+          <%= render GameView, "_grid.html", assigns %>
+        </div>
+
+      <% @game.status == :lost -> %>
+        <h1><%= if @game.current_player == @player, do: "You", else: @game.current_player %> lost...</h1>
+
+        <div class="grid">
+          <%= render GameView, "_grid.html", assigns %>
+        </div>
+    <% end %>
   <% end %>
 </div>

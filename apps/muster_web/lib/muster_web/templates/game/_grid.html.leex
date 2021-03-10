@@ -1,0 +1,7 @@
+<%= for row <- @game.grid do %>
+  <div class="row">
+    <%= for cell <- row do %>
+      <div class="cell <%= if cell, do: "tile" %>"><%= cell %></div>
+    <% end %>
+  </div>
+<% end %>
