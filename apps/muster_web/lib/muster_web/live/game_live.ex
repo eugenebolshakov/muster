@@ -8,21 +8,29 @@ defmodule MusterWeb.GameLive do
   def mount(_params, _session, socket) do
     if connected?(socket) do
       Endpoint.subscribe(@topic)
-
-      case Muster.join_game() do
-        {:ok, game, player} ->
-          GameMonitor.monitor(&unmount/0)
-          Endpoint.broadcast_from(self(), @topic, "player_joined", %{})
-          {:ok, assign(socket, game: game, player: player)}
-
-        {:error, :game_is_on} ->
-          game = Muster.get_current_game()
-          {:ok, assign(socket, game: game, player: nil)}
-      end
+      socket = join_game(socket)
+      {:ok, socket}
     else
       game = Muster.get_current_game()
       {:ok, assign(socket, game: game, player: nil)}
     end
+  end
+
+  defp join_game(socket) do
+    case Muster.join_game() do
+      {:ok, game, player} ->
+        Endpoint.broadcast_from(self(), @topic, "player_joined", %{})
+        start_playing(socket, game, player)
+
+      {:error, :game_is_on} ->
+        game = Muster.get_current_game()
+        assign(socket, game: game, player: nil)
+    end
+  end
+
+  defp start_playing(socket, game, player) do
+    GameMonitor.monitor(&unmount/0)
+    assign(socket, game: game, player: player)
   end
 
   @key_mappings %{
@@ -44,10 +52,41 @@ defmodule MusterWeb.GameLive do
   end
 
   @impl true
-  @events ~w(player_joined player_moved player_left)
+  def handle_event("restart_game", _value, socket) do
+    case Muster.restart_current_game() do
+      {:ok, game, player} ->
+        Endpoint.broadcast_from(self(), @topic, "game_restarted", %{})
+        {:noreply, start_playing(socket, game, player)}
+
+      {:error, :game_is_on} ->
+        game = Muster.get_current_game()
+        {:noreply, assign(socket, game: game, player: nil)}
+    end
+  end
+
+  @impl true
+  def handle_event("join_game", _value, socket) do
+    {:noreply, join_game(socket)}
+  end
+
+  @impl true
+  @events ~w(player_joined player_moved)
   def handle_info(%{event: event}, socket) when event in @events do
     game = Muster.get_current_game()
     {:noreply, assign(socket, game: game)}
+  end
+
+  @impl true
+  def handle_info(%{event: "player_left"}, socket) do
+    GameMonitor.demonitor()
+    game = Muster.get_current_game()
+    {:noreply, assign(socket, game: game)}
+  end
+
+  @impl true
+  def handle_info(%{event: "game_restarted"}, socket) do
+    game = Muster.get_current_game()
+    {:noreply, assign(socket, game: game, player: nil)}
   end
 
   def unmount() do
