@@ -95,4 +95,9 @@ defmodule Muster.Game do
   def stop(%__MODULE__{} = game) do
     %{game | status: :stopped}
   end
+
+  @spec ended?(t()) :: boolean()
+  def ended?(%__MODULE__{status: status}) do
+    status in ~w(won lost stopped)a
+  end
 end

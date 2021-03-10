@@ -155,6 +155,19 @@ defmodule Muster.GameTest do
     end
   end
 
+  describe "endded?/1" do
+    test "returns true if game has ended" do
+      game = Game.new()
+
+      refute Game.ended?(%{game | status: :waiting_for_players})
+      refute Game.ended?(%{game | status: :on})
+
+      assert Game.ended?(%{game | status: :won})
+      assert Game.ended?(%{game | status: :lost})
+      assert Game.ended?(%{game | status: :stopped})
+    end
+  end
+
   defp get_in_grid(grid, i, j) do
     get_in(grid, [Access.at(i), Access.at(j)])
   end

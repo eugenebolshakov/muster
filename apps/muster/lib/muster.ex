@@ -20,4 +20,9 @@ defmodule Muster do
   def stop_current_game() do
     CurrentGame.stop()
   end
+
+  @spec restart_current_game() :: {:ok, Game.t, Game.player()} | {:error, :game_is_on}
+  def restart_current_game() do
+    CurrentGame.restart()
+  end
 end

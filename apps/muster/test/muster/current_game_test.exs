@@ -53,9 +53,28 @@ defmodule Muster.CurrentGameTest do
     end
   end
 
+  describe "restart" do
+    setup [:start_game, :stop_game]
+
+    test "starts a new game and adds a player", %{current_game: current_game} do
+      assert CurrentGame.get(current_game).status == :stopped
+
+      assert {:ok, game, :player1} = CurrentGame.restart(current_game)
+      assert game.status == :waiting_for_players
+      assert game.players == [:player1]
+
+      assert CurrentGame.get(current_game) == game
+    end
+  end
+
   defp start_game(%{current_game: current_game} = context) do
     {:ok, _, _} = CurrentGame.join(current_game)
     {:ok, %{status: :on}, _} = CurrentGame.join(current_game)
+    context
+  end
+
+  defp stop_game(%{current_game: current_game} = context) do
+    CurrentGame.stop(current_game)
     context
   end
 end
