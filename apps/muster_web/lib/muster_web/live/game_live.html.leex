@@ -32,6 +32,13 @@
         <div class="grid">
           <%= render GameView, "_grid.html", assigns %>
         </div>
+
+      <% @game.status == :stopped -> %>
+        <h1>One of the players left the game...</h1>
+
+        <div class="grid">
+          <%= render GameView, "_grid.html", assigns %>
+        </div>
     <% end %>
   <% end %>
 </div>

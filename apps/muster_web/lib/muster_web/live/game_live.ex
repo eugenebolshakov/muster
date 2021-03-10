@@ -1,7 +1,6 @@
 defmodule MusterWeb.GameLive do
   use MusterWeb, :live_view
-  alias MusterWeb.GameView
-  alias MusterWeb.Endpoint
+  alias MusterWeb.{Endpoint, GameMonitor, GameView}
 
   @topic "game_update"
 
@@ -12,6 +11,7 @@ defmodule MusterWeb.GameLive do
 
       case Muster.join_game() do
         {:ok, game, player} ->
+          GameMonitor.monitor(&unmount/0)
           Endpoint.broadcast_from(self(), @topic, "player_joined", %{})
           {:ok, assign(socket, game: game, player: player)}
 
@@ -44,9 +44,14 @@ defmodule MusterWeb.GameLive do
   end
 
   @impl true
-  @events ~w(player_joined player_moved)
+  @events ~w(player_joined player_moved player_left)
   def handle_info(%{event: event}, socket) when event in @events do
     game = Muster.get_current_game()
     {:noreply, assign(socket, game: game)}
+  end
+
+  def unmount() do
+    Muster.stop_current_game()
+    Endpoint.broadcast(@topic, "player_left", %{})
   end
 end

@@ -8,6 +8,7 @@ defmodule MusterWeb.Application do
   def start(_type, _args) do
     children = [
       {Phoenix.PubSub, name: MusterWeb.PubSub},
+      {MusterWeb.GameMonitor, name: MusterWeb.GameMonitor},
       # Start the Telemetry supervisor
       MusterWeb.Telemetry,
       # Start the Endpoint (http/https)
