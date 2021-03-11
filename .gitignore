@@ -23,7 +23,3 @@ erl_crash.dump
 muster-*.tar
 
 .aliases
-
-.mix
-
-Dockerfile
