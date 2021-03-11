@@ -24,7 +24,8 @@ defmodule Muster.CurrentGameTest do
 
   describe "get/1" do
     test "returns current game", %{current_game: current_game} do
-      refute CurrentGame.get(current_game)
+      assert game = CurrentGame.get(current_game)
+      assert game.players == []
 
       assert {:ok, game, _player} = CurrentGame.join(current_game)
       assert CurrentGame.get(current_game) == game

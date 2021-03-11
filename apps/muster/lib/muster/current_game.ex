@@ -5,21 +5,18 @@ defmodule Muster.CurrentGame do
 
   alias Muster.Game
 
-  def init(nil) do
-    {:ok, nil}
-  end
-
+  @impl true
   def init(%Game{} = game) do
     {:ok, game}
   end
 
-  def init(_), do: {:error, "Game must be a #{Game} or nil"}
+  def init(_), do: {:error, "Game must be a #{Game}"}
 
   def start_link(opts \\ []) do
-    GenServer.start_link(__MODULE__, nil, opts)
+    GenServer.start_link(__MODULE__, Game.new, opts)
   end
 
-  @spec get(server()) :: Game.t() | nil
+  @spec get(server()) :: Game.t()
   def get(server \\ __MODULE__) do
     GenServer.call(server, :get)
   end
@@ -34,7 +31,7 @@ defmodule Muster.CurrentGame do
     GenServer.call(server, {:move, player, direction})
   end
 
-  @spec stop(server()) :: Game.t() | nil
+  @spec stop(server()) :: Game.t()
   def stop(server \\ __MODULE__) do
     GenServer.call(server, :stop)
   end
@@ -44,14 +41,17 @@ defmodule Muster.CurrentGame do
     GenServer.call(server, :restart)
   end
 
+  @impl true
   def handle_call(:get, _from, game) do
     {:reply, game, game}
   end
 
+  @impl true
   def handle_call(:join, _from, game) do
-    join_game(game || Game.new())
+    join_game(game)
   end
 
+  @impl true
   def handle_call({:move, player, direction}, _from, game) do
     case Game.move(game, player, direction) do
       {:ok, game} ->
@@ -62,13 +62,15 @@ defmodule Muster.CurrentGame do
     end
   end
 
+  @impl true
   def handle_call(:stop, _from, game) do
     game = game && Game.stop(game)
     {:reply, game, game}
   end
 
+  @impl true
   def handle_call(:restart, _from, game) do
-    if is_nil(game) || Game.ended?(game) do
+    if Game.ended?(game) do
       join_game(Game.new)
     else
       {:error, :game_is_on}

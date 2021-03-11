@@ -2,8 +2,6 @@ defmodule MusterTest do
   use ExUnit.Case
 
   test "Play a game" do
-    refute Muster.get_current_game()
-
     assert {:ok, game, :player1} = Muster.join_game()
     assert game.status == :waiting_for_players
     assert Muster.get_current_game() == game

@@ -1,7 +1,7 @@
 defmodule Muster do
   alias Muster.{CurrentGame, Game}
 
-  @spec get_current_game() :: Game.t() | nil
+  @spec get_current_game() :: Game.t()
   def get_current_game() do
     CurrentGame.get()
   end
@@ -16,7 +16,7 @@ defmodule Muster do
     CurrentGame.move(player, direction)
   end
 
-  @spec stop_current_game() :: Game.t() | nil
+  @spec stop_current_game() :: Game.t()
   def stop_current_game() do
     CurrentGame.stop()
   end
