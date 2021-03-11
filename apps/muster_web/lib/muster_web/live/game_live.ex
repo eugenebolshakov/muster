@@ -42,12 +42,14 @@ defmodule MusterWeb.GameLive do
 
   @impl true
   def handle_event("move", %{"key" => key}, socket) do
-    if direction = @key_mappings[key] do
-      game = Muster.move(direction)
+    with true <- Map.has_key?(@key_mappings, key),
+         {:ok, game} <- Muster.move(socket.assigns.player, @key_mappings[key]) do
       Endpoint.broadcast_from(self(), @topic, "player_moved", %{})
       {:noreply, assign(socket, game: game)}
     else
-      {:noreply, socket}
+      _ ->
+        game = Muster.get_current_game()
+        {:noreply, assign(socket, game: game)}
     end
   end
 
