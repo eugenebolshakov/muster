@@ -29,9 +29,9 @@ defmodule Muster.CurrentGame do
     GenServer.call(server, :join)
   end
 
-  @spec move(server(), Game.direction()) :: Game.t()
-  def move(server \\ __MODULE__, direction) do
-    GenServer.call(server, {:move, direction})
+  @spec move(server(), Game.player(), Game.direction()) :: {:ok, Game.t()} | {:error, :player_cant_move}
+  def move(server \\ __MODULE__, player, direction) do
+    GenServer.call(server, {:move, player, direction})
   end
 
   @spec stop(server()) :: Game.t() | nil
@@ -52,9 +52,13 @@ defmodule Muster.CurrentGame do
     join_game(game || Game.new())
   end
 
-  def handle_call({:move, direction}, _from, game) do
-    game = Game.move(game, direction)
-    {:reply, game, game}
+  def handle_call({:move, player, direction}, _from, game) do
+    if game.status == :on && game.current_player == player do
+      game = Game.move(game, direction)
+      {:reply, {:ok, game}, game}
+    else
+      {:reply, {:error, :player_cant_move}, game}
+    end
   end
 
   def handle_call(:stop, _from, game) do

@@ -13,7 +13,7 @@ defmodule MusterTest do
     assert game.current_player == :player1
     assert Muster.get_current_game() == game
 
-    game = Muster.move(:left)
+    assert {:ok, game} = Muster.move(:player1, :left)
     assert game.current_player == :player2
     assert Muster.get_current_game() == game
 

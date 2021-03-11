@@ -11,9 +11,9 @@ defmodule Muster do
     CurrentGame.join()
   end
 
-  @spec move(Game.direction()) :: Game.t()
-  def move(direction) do
-    CurrentGame.move(direction)
+  @spec move(Game.player(), Game.direction()) :: {:ok, Game.t()} | {:error, :player_cant_move}
+  def move(player, direction) do
+    CurrentGame.move(player, direction)
   end
 
   @spec stop_current_game() :: Game.t() | nil
