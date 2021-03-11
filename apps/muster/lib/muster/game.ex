@@ -32,26 +32,35 @@ defmodule Muster.Game do
     %__MODULE__{status: :waiting_for_players, grid: grid}
   end
 
-  @spec add_player(t(), player()) :: t()
+  @spec add_player(t(), player()) :: {:ok, t()} | {:error, :game_is_on}
   def add_player(%__MODULE__{status: :waiting_for_players} = game, player) do
     game = %{game | players: game.players ++ [player]}
 
-    if length(game.players) == @number_of_players do
+    game = if length(game.players) == @number_of_players do
       %{game | status: :on, current_player: hd(game.players)}
     else
       game
     end
+
+    {:ok, game}
   end
 
-  @spec move(t(), direction()) :: t()
-  def move(%__MODULE__{status: :on} = game, direction) do
-    game
-    |> move_tiles(direction)
-    |> check_win()
-    |> check_loss()
-    |> maybe_add_new_tile()
-    |> maybe_toggle_player()
+  def add_player(%__MODULE__{}, _), do: {:error, :game_is_on}
+
+  @spec move(t(), player(), direction()) :: {:ok, t()} | {:error, :player_cant_move}
+  def move(%__MODULE__{status: :on, current_player: player} = game, player, direction) do
+    game =
+      game
+      |> move_tiles(direction)
+      |> check_win()
+      |> check_loss()
+      |> maybe_add_new_tile()
+      |> maybe_toggle_player()
+
+    {:ok, game}
   end
+
+  def move(%__MODULE__{}, _, _), do: {:error, :player_cant_move}
 
   defp move_tiles(game, direction) do
     grid = Grid.move_tiles(game.grid, direction)

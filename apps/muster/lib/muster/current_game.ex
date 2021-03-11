@@ -53,11 +53,12 @@ defmodule Muster.CurrentGame do
   end
 
   def handle_call({:move, player, direction}, _from, game) do
-    if game.status == :on && game.current_player == player do
-      game = Game.move(game, direction)
-      {:reply, {:ok, game}, game}
-    else
-      {:reply, {:error, :player_cant_move}, game}
+    case Game.move(game, player, direction) do
+      {:ok, game} ->
+        {:reply, {:ok, game}, game}
+
+      error ->
+        {:reply, error, game}
     end
   end
 
@@ -75,12 +76,13 @@ defmodule Muster.CurrentGame do
   end
 
   defp join_game(game) do
-    if game.status == :waiting_for_players do
-      player = String.to_atom("player#{length(game.players) + 1}")
-      game = Game.add_player(game, player)
-      {:reply, {:ok, game, player}, game}
-    else
-      {:reply, {:error, :game_is_on}, game}
+    player = String.to_atom("player#{length(game.players) + 1}")
+    case Game.add_player(game, player) do
+      {:ok, game} ->
+        {:reply, {:ok, game, player}, game}
+
+      error ->
+        {:reply, error, game}
     end
   end
 end
