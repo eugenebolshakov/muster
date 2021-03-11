@@ -1,0 +1,7 @@
+<h1><%= player_name(@game.current_player, @player) %> won!</h1>
+
+<div class="grid">
+  <%= render "_grid.html", assigns %>
+</div>
+
+<button phx-click="restart_game">Play again</button>

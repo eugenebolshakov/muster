@@ -1,0 +1,8 @@
+<%= if @player do %>
+  <h1>Welcome!</h1>
+  <h2>Waiting for another player to join...</h2>
+
+<% else %>
+  <h1>Waiting for another player to join...</h1>
+  <button phx-click="join_game">Join</button>
+<% end %>

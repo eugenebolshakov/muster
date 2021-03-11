@@ -1,0 +1,14 @@
+<%= if @game.current_player == @player do %>
+  <h1>It's your turn</h1>
+
+  <div class="grid" phx-window-keyup="move">
+    <%= render "_grid.html", assigns %>
+  </div>
+
+<% else %>
+  <h1>It's <%= @game.current_player %>'s turn</h1>
+
+  <div class="grid">
+    <%= render "_grid.html", assigns %>
+  </div>
+<% end %>

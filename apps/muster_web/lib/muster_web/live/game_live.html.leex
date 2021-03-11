@@ -1,52 +1,5 @@
-<main class="game">
-  <%= cond do %>
-    <% @game.status == :waiting_for_players && @player -> %>
-      <h1>Welcome, <%= @player %>!</h1>
-      <h2>Waiting for another player to join...</h2>
+<%= if @player do %>
+  <h2>Playing as <%= @player %></h2>
+<% end %>
 
-    <% @game.status == :waiting_for_players -> %>
-      <h1>Waiting for another player to join...</h1>
-      <button phx-click="join_game">Join</button>
-
-    <% @game.status == :on && @game.current_player == @player -> %>
-      <h1>It's your turn</h1>
-
-      <div class="grid" phx-window-keyup="move">
-        <%= render GameView, "_grid.html", assigns %>
-      </div>
-
-    <% @game.status == :on -> %>
-      <h1>It's <%= @game.current_player %>'s turn</h1>
-
-      <div class="grid">
-        <%= render GameView, "_grid.html", assigns %>
-      </div>
-
-    <% @game.status == :won -> %>
-      <h1><%= if @game.current_player == @player, do: "You", else: @game.current_player %> won!</h1>
-
-      <div class="grid">
-        <%= render GameView, "_grid.html", assigns %>
-      </div>
-
-      <button phx-click="restart_game">Play again</button>
-
-    <% @game.status == :lost -> %>
-      <h1><%= if @game.current_player == @player, do: "You", else: @game.current_player %> lost...</h1>
-
-      <div class="grid">
-        <%= render GameView, "_grid.html", assigns %>
-      </div>
-
-      <button phx-click="restart_game">Play again</button>
-
-    <% @game.status == :stopped -> %>
-      <h1>One of the players left the game...</h1>
-
-      <div class="grid">
-        <%= render GameView, "_grid.html", assigns %>
-      </div>
-
-      <button phx-click="restart_game">Restart game</button>
-  <% end %>
-</div>
+<%= render GameView, "_#{@game.status}.html", assigns %>
