@@ -1,5 +1,3 @@
-<%= for row <- @game.grid do %>
-  <%= for cell <- row do %>
-    <div class="cell <%= if cell, do: "tile#{cell}" %>"><%= cell %></div>
-  <% end %>
+<%= for tile <- all_tiles(@game) do %>
+  <div id="<%= tile.id %>" class="cell row<%= tile.row %> column<%= tile.column %> tile<%= tile.value %> <%= if tile in @game.merged_tiles, do: "merged" %>"><%= tile.value %></div>
 <% end %>

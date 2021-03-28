@@ -12,20 +12,89 @@ body {
 }
 
 .grid {
-  width: 20rem;
-  height: 20rem;
-  display: grid;
-  grid-template-rows: repeat(6, 1fr);
-  grid-template-columns: repeat(6, 1fr);
-  gap: 0.2rem;
+  width: 20.5rem;
+  height: 20.5rem;
+  position: relative;
+  border: 0.01rem solid lightgrey;
+  background:
+    repeating-linear-gradient(lightgray, lightgray 3rem, transparent 3rem, transparent 3.5rem),
+    repeating-linear-gradient(90deg, lightgray, lightgray 3rem, transparent 3rem, transparent 3.5rem);
 }
 
 .cell {
+  position: absolute;
+  box-sizing: border-box;
+  width: 3rem;
+  height: 3rem;
   display: grid;
   place-content: center;
   border: 0.01rem solid grey;
-  border-radius: 0.5rem;
   font-weight: bold;
+  transition: top 0.5s, left 0.5s, transform 0.5s;
+  animation-name: appear;
+  animation-duration: 0.5s;
+}
+
+.merged {
+  transform: scale(0);
+}
+
+@keyframes appear {
+  from {
+    transform: scale(0);
+  }
+
+  to {
+    transform: scale(1);
+  }
+}
+
+.row0 {
+  top: 0;
+}
+
+.row1 {
+  top: 3.5rem;
+}
+
+.row2 {
+  top: 7rem;
+}
+
+.row3 {
+  top: 10.5rem;
+}
+
+.row4 {
+  top: 14rem;
+}
+
+.row5 {
+  top: 17.5rem;
+}
+
+.column0 {
+  left: 0;
+}
+
+.column1 {
+  left: 3.5rem;
+}
+
+.column2 {
+  left: 7rem;
+}
+
+.column3 {
+  left: 10.5rem;
+}
+
+.column4 {
+  left: 14rem;
+}
+
+.column5 {
+  left: 17.5rem;
 }
 
 .tile1 {

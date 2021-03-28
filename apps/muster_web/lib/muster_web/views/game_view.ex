@@ -8,4 +8,8 @@ defmodule MusterWeb.GameView do
       player
     end
   end
+
+  def all_tiles(game) do
+    Enum.sort_by(game.grid ++ game.merged_tiles, & &1.id)
+  end
 end

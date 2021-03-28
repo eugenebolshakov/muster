@@ -1,29 +1,26 @@
 defmodule Muster.GameTest do
   use ExUnit.Case
+  import Muster.TestHelper
 
   alias Muster.Game
 
+  @empty_grid [
+    [0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0]
+  ]
+
   describe "new/0" do
-    test "returns a Game with a 6x6 grid" do
-      %{grid: grid} = Game.new()
-
-      assert length(grid) == 6
-
-      grid
-      |> Enum.with_index()
-      |> Enum.each(fn {row, i} ->
-        assert length(row) == 6, "Row #{i} has wrong length"
-      end)
-    end
-
     test "returns a grid with a single tile of value 2" do
-      %{grid: grid} = Game.new()
+      assert %{grid: [tile]} = Game.new()
 
-      elements = List.flatten(grid)
-      assert length(elements) == 36
-
-      assert Enum.count(elements, &(&1 == 2)) == 1
-      assert Enum.count(elements, &is_nil/1) == 35
+      assert tile.value == 2
+      assert tile.row in (0..5)
+      assert tile.column in (0..5)
+      assert tile.id
     end
 
     test "returns a game that is waiting for players" do
@@ -70,71 +67,98 @@ defmodule Muster.GameTest do
     setup :start_game
 
     test "moves tiles and adds a tile of value 1", %{game: game} do
-      game = %{game | grid: [
-          [nil, 1, nil, 2, nil, nil],
-          [1, 1, nil, nil, 1, nil],
-          [nil, nil, nil, 2, 3, nil],
-          [3, 3, 6, nil, nil, nil],
-          [nil, nil, nil, nil, nil, nil],
-          [nil, 1, nil, 2, nil, nil]
-        ]
+      game = %{game | grid: tiles([
+          [0, 1, 0, 2, 0, 0],
+          [1, 1, 0, 0, 1, 0],
+          [0, 0, 0, 2, 3, 0],
+          [3, 3, 6, 0, 0, 0],
+          [0, 0, 0, 0, 0, 0],
+          [0, 1, 0, 2, 0, 0]
+        ])
+      }
+
+      expected_grid = tiles([
+        [1, 2, 0, 0, 0, 0],
+        [2, 1, 0, 0, 0, 0],
+        [2, 3, 0, 0, 0, 0],
+        [6, 6, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0],
+        [1, 2, 0, 0, 0, 0]
+      ])
+
+      assert {:ok, %{grid: grid}} = Game.move(game, :player1, :left)
+      assert [new_tile] = remove_ids(grid) -- expected_grid
+      assert new_tile.value == 1
+    end
+
+    test "assigns unique ids to tiles", %{game: game} do
+      game = %{game | grid: tiles([
+          [0, 1, 0, 2, 0, 0],
+          [1, 1, 0, 0, 1, 0],
+          [0, 0, 0, 2, 3, 0],
+          [3, 3, 6, 0, 0, 0],
+          [0, 0, 0, 0, 0, 0],
+          [0, 1, 0, 2, 0, 0]
+        ])
       }
 
       assert {:ok, %{grid: grid}} = Game.move(game, :player1, :left)
+      assert Enum.map(grid, & &1.id) |> Enum.uniq |> length == length(grid)
+    end
 
-      expected_grid = [
-        [1, 2, nil, nil, nil, nil],
-        [2, 1, nil, nil, nil, nil],
-        [2, 3, nil, nil, nil, nil],
-        [6, 6, nil, nil, nil, nil],
-        [nil, nil, nil, nil, nil, nil],
-        [1, 2, nil, nil, nil, nil]
-      ]
+    test "stores merged tiles", %{game: game} do
+      game = set_grid(game, [
+        [1, 1, 2, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0]
+      ])
 
-      Enum.each(0..5, fn i ->
-        Enum.each(0..5, fn j ->
-          expected_cell = get_in_grid(expected_grid, i, j)
-          cell = get_in_grid(grid, i, j)
+      assert {:ok, game} = Game.move(game, :player1, :left)
+      assert Enum.at(game.grid, 0).value == 2
+      assert Enum.at(game.grid, 1).value == 2
+      assert Enum.map(game.merged_tiles, & &1.value) == [1, 1]
 
-          if is_nil(expected_cell) do
-            assert is_nil(cell) || cell == 1, "Expected nil or 1 at #{i}:#{j}, got: #{cell}"
-          else
-            assert cell == expected_cell, "Wrong cell at #{i}:#{j}"
-          end
-        end)
-      end)
-
-      expected_spaces =
-        expected_grid
-        |> List.flatten()
-        |> Enum.count(&is_nil/1)
-
-      spaces =
-        grid
-        |> List.flatten()
-        |> Enum.count(&is_nil/1)
-
-      assert spaces == expected_spaces - 1, "Wrong number of spaces left"
+      assert {:ok, game} = Game.move(game, :player2, :left)
+      assert Enum.at(game.grid, 0).value == 4
+      assert Enum.map(game.merged_tiles, & &1.value) == [1, 1, 2, 2]
     end
 
     test "game is won when a tile reaches the value 2048", %{game: game} do
-      game = %{game | grid: [[1024, 512, 512, nil, nil, nil]] ++ build_empty_rows(5)}
+      game = %{game | grid: tiles([
+        [1024, 512, 512, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0]
+      ])}
 
-      assert {:ok, game} = Game.move(game, game.current_player, :left)
-      assert get_in_grid(game.grid, 0, 0) == 1024
-      assert get_in_grid(game.grid, 0, 1) == 1024
+      assert {:ok, %{grid: [tile1 | [tile2 | _]]} = game} = Game.move(game, game.current_player, :left)
+      assert tile1.value == 1024
+      assert tile2.value == 1024
       assert game.status == :on
 
-      assert {:ok, game} = Game.move(game, game.current_player, :left)
-      assert get_in_grid(game.grid, 0, 0) == 2048
+      assert {:ok, %{grid: [tile | _]} = game} = Game.move(game, game.current_player, :left)
+      assert tile.value == 2048
       assert game.status == :won
     end
 
     test "game is lost when there is no space to add a new tile", %{game: game} do
-      game = %{game | grid: [[1, 2, 3, 4, 5, nil]] ++ List.duplicate([1, 2, 3, 4, 5, 6], 5)}
+      game = %{game | grid: tiles([
+        [1, 2, 3, 4, 5, 6],
+        [1, 2, 3, 4, 5, 6],
+        [1, 2, 3, 4, 5, 6],
+        [1, 2, 3, 4, 5, 6],
+        [1, 2, 3, 4, 5, 6],
+        [1, 2, 3, 4, 5, 0]
+      ])}
 
       assert {:ok, game} = Game.move(game, game.current_player, :left)
-      assert get_in_grid(game.grid, 0, 5) == 1
+      assert length(game.grid) == 36
+      assert List.last(game.grid).value == 1
       assert game.status == :on
 
       assert {:ok, game} = Game.move(game, game.current_player, :left)
@@ -142,7 +166,7 @@ defmodule Muster.GameTest do
     end
 
     test "toggles current player" do
-      game = %Game{status: :on, players: [:player1, :player2], current_player: :player1, grid: build_empty_rows(6)}
+      game = %Game{status: :on, players: [:player1, :player2], current_player: :player1, grid: tiles(@empty_grid)}
 
       assert {:ok, game} = Game.move(game, :player1, :left)
       assert game.current_player == :player2
@@ -183,24 +207,18 @@ defmodule Muster.GameTest do
     end
   end
 
-  defp get_in_grid(grid, i, j) do
-    get_in(grid, [Access.at(i), Access.at(j)])
-  end
-
   defp start_game(context) do
     game = %Game{
       status: :on,
       players: [:player1, :player2],
       current_player: :player1,
-      grid: build_empty_rows(6)
+      grid: tiles(@empty_grid)
     }
 
     Map.put(context, :game, game)
   end
 
-  defp build_empty_rows(number_of_rows) do
-    nil
-    |> List.duplicate(6)
-    |> List.duplicate(number_of_rows)
+  defp remove_ids(tiles) do
+    Enum.map(tiles, & %{&1 | id: nil})
   end
 end

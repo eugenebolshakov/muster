@@ -65,8 +65,6 @@ has been performed by ./start.sh):
 * Via docker: `docker run --rm -v $PWD:/usr/src/app muster mix test`
 * On the host directly: `mix test`
 
-## Things I wish I had time to add
+## TODO
 
-* Animations (currently the entire grid is re-rendered on every move, so
-  animating tiles would require a different approach).
 * Tests for the UI (some acceptances tests using Wallaby for example).

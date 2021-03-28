@@ -1,5 +1,5 @@
 defmodule Muster.Game do
-  alias Muster.Game.Grid
+  alias Muster.Game.{Grid, Tile}
 
   @type status :: :waiting_for_players | :on | :won | :lost | :stopped
   @type player :: :player1 | :player2
@@ -8,15 +8,16 @@ defmodule Muster.Game do
           status: status(),
           players: [player()],
           current_player: player() | nil,
-          grid: Grid.t()
+          grid: Grid.t(),
+          next_id: Tile.id(),
+          merged_tiles: [Tile.t]
         }
 
   @type direction :: :left | :right | :up | :down
 
   @enforce_keys [:status, :grid]
-  defstruct [status: nil, grid: nil, players: [], current_player: nil]
+  defstruct [status: nil, grid: nil, next_id: 1, merged_tiles: [], players: [], current_player: nil]
 
-  @grid_size 6
   @first_tile 2
   @new_tile 1
   @winning_tile 2048
@@ -24,12 +25,12 @@ defmodule Muster.Game do
 
   @spec new() :: t()
   def new() do
-    grid =
-      @grid_size
-      |> Grid.new()
+    {grid, next_id} =
+      Grid.new()
       |> Grid.put_tile_in_random_space(@first_tile)
+      |> Grid.put_ids(1)
 
-    %__MODULE__{status: :waiting_for_players, grid: grid}
+    %__MODULE__{status: :waiting_for_players, grid: grid, next_id: next_id}
   end
 
   @spec add_player(t(), player()) :: {:ok, t()} | {:error, :game_is_on}
@@ -63,8 +64,15 @@ defmodule Muster.Game do
   def move(%__MODULE__{}, _, _), do: {:error, :player_cant_move}
 
   defp move_tiles(game, direction) do
-    grid = Grid.move_tiles(game.grid, direction)
-    %{game | grid: grid}
+    {grid, next_id} =
+      game.grid
+      |> Grid.move_tiles(direction)
+      |> Grid.put_ids(game.next_id)
+
+    tile_ids = Enum.map(grid, & &1.id)
+    merged_tiles = Enum.filter(game.grid, & &1.id not in tile_ids)
+
+    %{game | grid: grid, next_id: next_id, merged_tiles: game.merged_tiles ++ merged_tiles}
   end
 
   defp check_win(game) do
@@ -85,8 +93,12 @@ defmodule Muster.Game do
 
   defp maybe_add_new_tile(game) do
     if game.status == :on do
-      grid = Grid.put_tile_in_random_space(game.grid, @new_tile)
-      %{game | grid: grid}
+      {grid, next_id} =
+        game.grid
+        |> Grid.put_tile_in_random_space(@new_tile)
+        |> Grid.put_ids(game.next_id)
+
+      %{game | grid: grid, next_id: next_id}
     else
       game
     end

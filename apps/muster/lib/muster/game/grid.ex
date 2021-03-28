@@ -1,115 +1,123 @@
 defmodule Muster.Game.Grid do
   alias Muster.Game
+  alias Muster.Game.Tile
 
-  @type tile :: pos_integer
-  @type row :: [Game.tile() | nil]
-  @type t :: [row()]
+  @type t :: [Tile.t]
 
-  @spec new(size :: pos_integer) :: t()
-  def new(size) do
-    nil
-    |> List.duplicate(size)
-    |> List.duplicate(size)
+  @grid_size 6
+
+  @spec new() :: t()
+  def new() do
+    []
   end
 
-  @spec put_tile_in_random_space(t(), tile()) :: t()
-  def put_tile_in_random_space(grid, tile) do
-    random_index =
-      grid
-      |> list_spaces()
-      |> Enum.random()
-
-    put_tile_at(grid, tile, random_index)
+  @spec put_tile_in_random_space(t(), Tile.value()) :: t()
+  def put_tile_in_random_space(tiles, value) do
+    {row, column} = tiles |> spaces |> Enum.random()
+    tile = %Tile{row: row, column: column, value: value}
+    sort([tile | tiles])
   end
 
-  defp list_spaces(grid) do
-    grid
-    |> List.flatten()
-    |> Enum.with_index()
-    |> Enum.filter(fn {cell, _i} -> is_nil(cell) end)
-    |> Enum.map(fn {nil, i} -> i end)
+  @spec put_ids(t(), next_id :: Tile.id()) :: {t(), next_id :: Tile.id()}
+  def put_ids(tiles, next_id) do
+    Enum.map_reduce(tiles, next_id, fn tile, next_id ->
+      if tile.id do
+        {tile, next_id}
+      else
+        {%{tile | id: next_id}, next_id + 1}
+      end
+    end)
   end
 
-  defp put_tile_at(grid, tile, index) do
-    grid_size = length(grid)
-    i = div(index, grid_size)
-    j = Integer.mod(index, grid_size)
-    put_in(grid, [Access.at(i), Access.at(j)], tile)
+  defp spaces(tiles) do
+    indices = 0..(@grid_size - 1)
+
+    positions = Enum.flat_map(indices, fn row ->
+      Enum.map(indices, fn column ->
+        {row, column}
+      end)
+    end)
+
+    tile_positions = Enum.map(tiles, fn tile -> {tile.row, tile.column} end)
+    positions -- tile_positions
+  end
+
+  defp sort(tiles) do
+    Enum.sort(tiles, Tile)
   end
 
   @spec move_tiles(t(), Game.direction()) :: t()
-  def move_tiles(grid, :left) do
-    Enum.map(grid, &move_tiles/1)
+  def move_tiles(tiles, :left) do
+    tiles
+    |> rows()
+    |> Enum.map(&move_tiles_in_row/1)
+    |> List.flatten
   end
 
-  def move_tiles(grid, :right) do
-    grid
+  def move_tiles(tiles, :right) do
+    tiles
     |> reverse_columns()
     |> move_tiles(:left)
     |> reverse_columns()
   end
 
-  def move_tiles(grid, :up) do
-    grid
-    |> transpose_grid()
+  def move_tiles(tiles, :up) do
+    tiles
+    |> transpose()
     |> move_tiles(:left)
-    |> transpose_grid()
+    |> transpose()
   end
 
-  def move_tiles(grid, :down) do
-    grid
-    |> transpose_grid()
+  def move_tiles(tiles, :down) do
+    tiles
+    |> transpose()
     |> reverse_columns()
     |> move_tiles(:left)
     |> reverse_columns()
-    |> transpose_grid()
+    |> transpose()
   end
 
-  @spec move_tiles(row()) :: row()
-  def move_tiles(row) do
+  defp rows(tiles) do
+    Enum.map(0..(@grid_size-1), fn row_index ->
+      Enum.filter(tiles, fn tile -> tile.row == row_index end)
+    end)
+  end
+
+  @spec move_tiles_in_row([Tile.t], Tile.index()) :: [Tile.t]
+  def move_tiles_in_row(row, current_column \\ 0) do
     case row do
       [] ->
         []
 
-      [nil | rest] ->
-        move_tiles(rest) ++ [nil]
-
-      [tile | [nil | rest]] ->
-        move_tiles([tile] ++ rest) ++ [nil]
-
-      [tile | [tile | rest]] ->
-        [tile + tile] ++ move_tiles(rest) ++ [nil]
+      [%{value: value} = tile | [%{value: value} | rest]] ->
+        [%Tile{row: tile.row, column: current_column, value: value * 2} | move_tiles_in_row(rest, current_column + 1)]
 
       [tile | rest] ->
-        [tile] ++ move_tiles(rest)
+        [%{tile | column: current_column} | move_tiles_in_row(rest, current_column + 1)]
     end
   end
 
-  def transpose_grid([]), do: []
-  def transpose_grid([[] | _] = grid), do: grid
-
-  @spec transpose_grid(t()) :: [t()]
-  def transpose_grid([row | _] = grid) do
-    Enum.map(0..(length(grid) - 1), fn i ->
-      Enum.map(0..(length(row) - 1), fn j ->
-        get_in(grid, [Access.at(j), Access.at(i)])
-      end)
-    end)
+  defp reverse_columns(tiles) do
+    tiles
+    |> Enum.map(&Tile.reverse_column(&1, @grid_size - 1))
+    |> sort()
   end
 
-  defp reverse_columns(grid) do
-    Enum.map(grid, &Enum.reverse/1)
+  defp transpose(tiles) do
+    tiles
+    |> Enum.map(&Tile.transpose/1)
+    |> sort()
   end
 
-  @spec tile_present?(t(), tile()) :: boolean()
-  def tile_present?(grid, tile) do
-    Enum.any?(grid, fn row -> tile in row end)
+  @spec tile_present?(t(), Tile.value()) :: boolean()
+  def tile_present?(tiles, value) do
+    Enum.any?(tiles, fn tile -> tile.value == value end)
   end
 
   @spec count_spaces(t()) :: integer()
-  def count_spaces(grid) do
-    grid
-    |> list_spaces
+  def count_spaces(tiles) do
+    tiles
+    |> spaces
     |> length
   end
 end

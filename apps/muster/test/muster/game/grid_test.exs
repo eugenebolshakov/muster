@@ -1,55 +1,48 @@
 defmodule Muster.Game.GridTest do
   use ExUnit.Case
+  import Muster.TestHelper
 
   alias Muster.Game.Grid
 
-  describe "new/1" do
-    test "returns an empty grid of given size" do
-      assert Grid.new(2) == [
-               [nil, nil],
-               [nil, nil]
-             ]
-
-      assert Grid.new(3) == [
-               [nil, nil, nil],
-               [nil, nil, nil],
-               [nil, nil, nil]
-             ]
+  describe "new/0" do
+    test "returns an empty list of tiles" do
+      assert Grid.new() == []
     end
   end
 
   describe "put_tile_in_random_space/2" do
-    test "puts tile into an empty space" do
-      assert Grid.put_tile_in_random_space([[nil]], 1) == [[1]]
-
-      grid = [
-        [1, 2],
-        [3, nil]
-      ]
-
-      assert Grid.put_tile_in_random_space(grid, 4) == [
-               [1, 2],
-               [3, 4]
-             ]
+    test "adds tile with the passed value" do
+      assert [%{value: 1}] = Grid.put_tile_in_random_space([], 1)
     end
 
-    test "puts tile into a random space" do
-      grid = Grid.new(3)
+    test "adds tile into an empty space" do
+      grid = [
+        [1, 1, 1, 1, 1, 1],
+        [1, 1, 1, 1, 1, 1],
+        [1, 1, 1, 1, 1, 1],
+        [1, 1, 1, 1, 0, 1],
+        [1, 1, 1, 1, 1, 1],
+        [1, 1, 1, 1, 1, 1]
+      ]
 
+      new_tile =
+        grid
+        |> tiles()
+        |> Grid.put_tile_in_random_space(2)
+        |> Enum.find(fn tile -> tile.value == 2 end)
+
+      assert new_tile.row == 3
+      assert new_tile.column == 4
+    end
+
+    test "adds tile into a random space" do
       tile_locations =
         0..5
         |> Enum.map(fn _ ->
-          grid = Grid.put_tile_in_random_space(grid, 1)
-
-          elements = List.flatten(grid)
-          assert length(elements) == 9
-
-          assert Enum.count(elements, &(&1 == 1)) == 1
-          assert Enum.count(elements, &is_nil/1) == 8
-
-          Enum.find_index(elements, &(&1 == 1))
+          assert [tile] = Grid.put_tile_in_random_space([], 1)
+          {tile.row, tile.column}
         end)
-        |> Enum.uniq()
+        |> Enum.uniq
 
       assert length(tile_locations) > 1, "Tile placed in the same location 5 times"
     end
@@ -57,130 +50,140 @@ defmodule Muster.Game.GridTest do
 
   describe "move_tiles/2" do
     @grid [
-      [nil, 1, 1],
-      [nil, nil, 1],
-      [1, nil, 2]
+      [0, 1, 0, 0, 0, 1],
+      [0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 1],
+      [0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0],
+      [1, 0, 0, 0, 0, 2]
     ]
 
     test "moves tiles in a grid left" do
-      assert Grid.move_tiles(@grid, :left) == [
-               [2, nil, nil],
-               [1, nil, nil],
-               [1, 2, nil]
-             ]
+      assert move_tiles(@grid, :left) == tiles([
+               [2, 0, 0, 0, 0, 0],
+               [0, 0, 0, 0, 0, 0],
+               [1, 0, 0, 0, 0, 0],
+               [0, 0, 0, 0, 0, 0],
+               [0, 0, 0, 0, 0, 0],
+               [1, 2, 0, 0, 0, 0]
+             ])
     end
 
     test "moves tiles in a grid right" do
-      assert Grid.move_tiles(@grid, :right) == [
-               [nil, nil, 2],
-               [nil, nil, 1],
-               [nil, 1, 2]
-             ]
+      assert move_tiles(@grid, :right) == tiles([
+               [0, 0, 0, 0, 0, 2],
+               [0, 0, 0, 0, 0, 0],
+               [0, 0, 0, 0, 0, 1],
+               [0, 0, 0, 0, 0, 0],
+               [0, 0, 0, 0, 0, 0],
+               [0, 0, 0, 0, 1, 2]
+             ])
     end
 
     test "moves tiles in a grid up" do
-      assert Grid.move_tiles(@grid, :up) == [
-               [1, 1, 2],
-               [nil, nil, 2],
-               [nil, nil, nil]
-             ]
+      assert move_tiles(@grid, :up) == tiles([
+               [1, 1, 0, 0, 0, 2],
+               [0, 0, 0, 0, 0, 2],
+               [0, 0, 0, 0, 0, 0],
+               [0, 0, 0, 0, 0, 0],
+               [0, 0, 0, 0, 0, 0],
+               [0, 0, 0, 0, 0, 0]
+             ])
     end
 
     test "moves tiles in a grid down" do
-      assert Grid.move_tiles(@grid, :down) == [
-               [nil, nil, nil],
-               [nil, nil, 2],
-               [1, 1, 2]
-             ]
+      assert move_tiles(@grid, :down) == tiles([
+               [0, 0, 0, 0, 0, 0],
+               [0, 0, 0, 0, 0, 0],
+               [0, 0, 0, 0, 0, 0],
+               [0, 0, 0, 0, 0, 0],
+               [0, 0, 0, 0, 0, 2],
+               [1, 1, 0, 0, 0, 2]
+             ])
     end
   end
 
-  describe "move_tiles/1" do
+  describe "move_tiles_in_row/1" do
     test "moves tiles to the beginning" do
-      assert Grid.move_tiles([1]) == [1]
-      assert Grid.move_tiles([nil, 1]) == [1, nil]
-      assert Grid.move_tiles([1, nil]) == [1, nil]
-      assert Grid.move_tiles([1, nil, 2]) == [1, 2, nil]
-      assert Grid.move_tiles([nil, 1, 2]) == [1, 2, nil]
-      assert Grid.move_tiles([1, 2, nil]) == [1, 2, nil]
-      assert Grid.move_tiles([1, nil, nil, 2]) == [1, 2, nil, nil]
-
-      assert Grid.move_tiles([nil, nil, 1, nil, nil, 2, nil, nil]) ==
-               [1, 2] ++ List.duplicate(nil, 6)
+      assert move_tiles([1]) == row([1])
+      assert move_tiles([0, 1]) == row([1])
+      assert move_tiles([1, 0, 2]) == row([1, 2])
+      assert move_tiles([0, 1, 2]) == row([1, 2])
+      assert move_tiles([1, 0, 0, 2]) == row([1, 2])
+      assert move_tiles([0, 0, 1, 0, 0, 2]) == row([1, 2])
     end
 
     test "merges tiles with the same numbers and sums the numbers" do
-      assert Grid.move_tiles([1, 1]) == [2, nil]
-      assert Grid.move_tiles([2, 2]) == [4, nil]
-      assert Grid.move_tiles([1, nil, 1]) == [2, nil, nil]
-      assert Grid.move_tiles([1, nil, nil, 1]) == [2, nil, nil, nil]
-      assert Grid.move_tiles([nil, 1, nil, 1]) == [2, nil, nil, nil]
-      assert Grid.move_tiles([1, nil, 1, nil]) == [2, nil, nil, nil]
+      assert move_tiles([1, 1]) == row([2])
+      assert move_tiles([2, 2]) == row([4])
+      assert move_tiles([1, 0, 1]) == row([2])
+      assert move_tiles([1, 0, 0, 1]) == row([2])
+      assert move_tiles([0, 1, 0, 1]) == row([2])
     end
 
     test "merges leftmost tiles" do
-      assert Grid.move_tiles([1, 1, 1]) == [2, 1, nil]
-      assert Grid.move_tiles([nil, 1, nil, 1, nil, 1, nil]) == [2, 1, nil, nil, nil, nil, nil]
-      assert Grid.move_tiles([1, nil, 1, 1]) == [2, 1, nil, nil]
+      assert move_tiles([1, 1, 1]) == row([2, 1])
+      assert move_tiles([0, 1, 0, 1, 0, 1]) == row([2, 1])
+      assert move_tiles([1, 0, 1, 1]) == row([2, 1])
     end
 
     test "merges pairs of tiles" do
-      assert Grid.move_tiles([1, 1, 1, 1]) == [2, 2, nil, nil]
-
-      assert Grid.move_tiles([nil, 1, nil, 1, nil, 1, nil, 1, nil]) ==
-               [2, 2] ++ List.duplicate(nil, 7)
+      assert move_tiles([1, 1, 1, 1]) == row([2, 2])
+      assert move_tiles([0, 1, 0, 1, 0, 1, 0, 1]) == row([2, 2])
     end
 
     test "merges tiles once per move" do
-      assert Grid.move_tiles([1, 1, 2]) == [2, 2, nil]
-      assert Grid.move_tiles([1, nil, 1, nil, 2]) == [2, 2, nil, nil, nil]
-      assert Grid.move_tiles([1, 1, nil, 2]) == [2, 2, nil, nil]
-      assert Grid.move_tiles([2, nil, 1, 1]) == [2, 2, nil, nil]
+      assert move_tiles([1, 1, 2]) == row([2, 2])
+      assert move_tiles([1, 0, 1, 0, 2]) == row([2, 2])
+      assert move_tiles([1, 1, 0, 2]) == row([2, 2])
+      assert move_tiles([2, 0, 1, 1]) == row([2, 2])
     end
 
     test "can handle empty row" do
-      assert Grid.move_tiles([]) == []
-      assert Grid.move_tiles([nil]) == [nil]
-      assert Grid.move_tiles([nil, nil]) == [nil, nil]
-      assert Grid.move_tiles([nil, nil, nil]) == [nil, nil, nil]
-    end
-  end
-
-  describe "transpose_grid/1" do
-    test "replaces rows with columns" do
-      grid = [
-        [1, 2, 3],
-        [4, 5, 6],
-        [7, 8, 9]
-      ]
-
-      assert Grid.transpose_grid(grid) == [
-               [1, 4, 7],
-               [2, 5, 8],
-               [3, 6, 9]
-             ]
+      assert move_tiles([]) == row([])
     end
   end
 
   describe "tile_present?/2" do
     test "returns true if tile is present in the grid" do
-      refute Grid.tile_present?([[]], 1)
-      refute Grid.tile_present?([[nil]], 1)
-      refute Grid.tile_present?([[2]], 1)
-      refute Grid.tile_present?([[nil, 2], [3, nil]], 1)
+      refute Grid.tile_present?(tiles([[]]), 1)
+      refute Grid.tile_present?(tiles([[0]]), 1)
+      refute Grid.tile_present?(tiles([[2]]), 1)
+      refute Grid.tile_present?(tiles([[0, 2], [3, 0]]), 1)
 
-      assert Grid.tile_present?([[1]], 1)
-      assert Grid.tile_present?([[2, nil], [nil, 1]], 1)
+      assert Grid.tile_present?(tiles([[1]]), 1)
+      assert Grid.tile_present?(tiles([[2, 0], [0, 1]]), 1)
     end
   end
 
   describe "count_spaces/1" do
     test "returns number of spaces in a grid" do
-      assert Grid.count_spaces([[]]) == 0
-      assert Grid.count_spaces([[1]]) == 0
-      assert Grid.count_spaces([[nil]]) == 1
-      assert Grid.count_spaces([[1, 2], [3, 4]]) == 0
-      assert Grid.count_spaces([[1, nil], [nil, 4]]) == 2
+      grid = [
+        [1, 1, 1, 1, 1, 1],
+        [1, 1, 1, 1, 1, 1],
+        [1, 1, 1, 1, 1, 1],
+        [1, 1, 1, 1, 1, 1],
+        [1, 1, 1, 1, 1, 1],
+        [1, 1, 1, 1, 1, 1]
+      ]
+
+      assert Grid.count_spaces(tiles(grid)) == 0
+
+      grid = put_in(grid, [Access.at(0), Access.at(0)], 0)
+      assert Grid.count_spaces(tiles(grid)) == 1
+
+      grid = put_in(grid, [Access.at(0), Access.at(1)], 0)
+      assert Grid.count_spaces(tiles(grid)) == 2
     end
+  end
+
+  defp move_tiles(grid, direction) do
+    Grid.move_tiles(tiles(grid), direction)
+  end
+
+  defp move_tiles(row_tiles) do
+    row_tiles
+    |> row()
+    |> Grid.move_tiles_in_row()
   end
 end
