@@ -43,7 +43,7 @@ defmodule Muster.CurrentGameTest do
 
     test "returns error if player can't make the move", %{current_game: current_game} do
       assert %{current_player: player, players: players} = CurrentGame.get(current_game)
-      other_player = Enum.find(players, & &1 != player)
+      other_player = Enum.find(players, &(&1 != player))
       assert {:error, :player_cant_move} = CurrentGame.move(current_game, other_player, :left)
       assert CurrentGame.get(current_game).current_player == player
     end

@@ -4,11 +4,11 @@ defmodule Muster.Game.Tile do
   @type value :: pos_integer()
 
   @type t :: %__MODULE__{
-    id: id(),
-    row: index(),
-    column: index(),
-    value: value()
-  }
+          id: id(),
+          row: index(),
+          column: index(),
+          value: value()
+        }
 
   @enforce_keys ~w(row column value)a
   defstruct ~w(id row column value)a

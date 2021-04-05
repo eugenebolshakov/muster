@@ -42,7 +42,7 @@ defmodule Muster.Game.GridTest do
           assert [tile] = Grid.put_tile_in_random_space([], 1)
           {tile.row, tile.column}
         end)
-        |> Enum.uniq
+        |> Enum.uniq()
 
       assert length(tile_locations) > 1, "Tile placed in the same location 5 times"
     end
@@ -59,47 +59,51 @@ defmodule Muster.Game.GridTest do
     ]
 
     test "moves tiles in a grid left" do
-      assert move_tiles(@grid, :left) == tiles([
-               [2, 0, 0, 0, 0, 0],
-               [0, 0, 0, 0, 0, 0],
-               [1, 0, 0, 0, 0, 0],
-               [0, 0, 0, 0, 0, 0],
-               [0, 0, 0, 0, 0, 0],
-               [1, 2, 0, 0, 0, 0]
-             ])
+      assert move_tiles(@grid, :left) ==
+               tiles([
+                 [2, 0, 0, 0, 0, 0],
+                 [0, 0, 0, 0, 0, 0],
+                 [1, 0, 0, 0, 0, 0],
+                 [0, 0, 0, 0, 0, 0],
+                 [0, 0, 0, 0, 0, 0],
+                 [1, 2, 0, 0, 0, 0]
+               ])
     end
 
     test "moves tiles in a grid right" do
-      assert move_tiles(@grid, :right) == tiles([
-               [0, 0, 0, 0, 0, 2],
-               [0, 0, 0, 0, 0, 0],
-               [0, 0, 0, 0, 0, 1],
-               [0, 0, 0, 0, 0, 0],
-               [0, 0, 0, 0, 0, 0],
-               [0, 0, 0, 0, 1, 2]
-             ])
+      assert move_tiles(@grid, :right) ==
+               tiles([
+                 [0, 0, 0, 0, 0, 2],
+                 [0, 0, 0, 0, 0, 0],
+                 [0, 0, 0, 0, 0, 1],
+                 [0, 0, 0, 0, 0, 0],
+                 [0, 0, 0, 0, 0, 0],
+                 [0, 0, 0, 0, 1, 2]
+               ])
     end
 
     test "moves tiles in a grid up" do
-      assert move_tiles(@grid, :up) == tiles([
-               [1, 1, 0, 0, 0, 2],
-               [0, 0, 0, 0, 0, 2],
-               [0, 0, 0, 0, 0, 0],
-               [0, 0, 0, 0, 0, 0],
-               [0, 0, 0, 0, 0, 0],
-               [0, 0, 0, 0, 0, 0]
-             ])
+      assert move_tiles(@grid, :up) ==
+               tiles([
+                 [1, 1, 0, 0, 0, 2],
+                 [0, 0, 0, 0, 0, 2],
+                 [0, 0, 0, 0, 0, 0],
+                 [0, 0, 0, 0, 0, 0],
+                 [0, 0, 0, 0, 0, 0],
+                 [0, 0, 0, 0, 0, 0]
+               ])
     end
 
     test "moves tiles in a grid down" do
-      assert move_tiles(@grid, :down) == tiles([
-               [0, 0, 0, 0, 0, 0],
-               [0, 0, 0, 0, 0, 0],
-               [0, 0, 0, 0, 0, 0],
-               [0, 0, 0, 0, 0, 0],
-               [0, 0, 0, 0, 0, 2],
-               [1, 1, 0, 0, 0, 2]
-             ])
+      assert move_tiles(@grid, :down) ==
+               tiles([
+                 [0, 0, 0, 0, 0, 0],
+                 [0, 0, 0, 0, 0, 0],
+                 [0, 0, 0, 0, 0, 0],
+                 [0, 0, 0, 0, 0, 0],
+                 [0, 0, 0, 0, 0, 2],
+                 [1, 1, 0, 0, 0, 2]
+               ])
     end
   end
 

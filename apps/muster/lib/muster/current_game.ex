@@ -13,7 +13,7 @@ defmodule Muster.CurrentGame do
   def init(_), do: {:error, "Game must be a #{Game}"}
 
   def start_link(opts \\ []) do
-    GenServer.start_link(__MODULE__, Game.new, opts)
+    GenServer.start_link(__MODULE__, Game.new(), opts)
   end
 
   @spec get(server()) :: Game.t()
@@ -26,7 +26,8 @@ defmodule Muster.CurrentGame do
     GenServer.call(server, :join)
   end
 
-  @spec move(server(), Game.player(), Game.direction()) :: {:ok, Game.t()} | {:error, :player_cant_move}
+  @spec move(server(), Game.player(), Game.direction()) ::
+          {:ok, Game.t()} | {:error, :player_cant_move}
   def move(server \\ __MODULE__, player, direction) do
     GenServer.call(server, {:move, player, direction})
   end
@@ -71,7 +72,7 @@ defmodule Muster.CurrentGame do
   @impl true
   def handle_call(:restart, _from, game) do
     if Game.ended?(game) do
-      join_game(Game.new)
+      join_game(Game.new())
     else
       {:error, :game_is_on}
     end
@@ -79,6 +80,7 @@ defmodule Muster.CurrentGame do
 
   defp join_game(game) do
     player = String.to_atom("player#{length(game.players) + 1}")
+
     case Game.add_player(game, player) do
       {:ok, game} ->
         {:reply, {:ok, game, player}, game}

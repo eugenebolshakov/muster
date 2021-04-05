@@ -2,7 +2,7 @@ defmodule Muster.Game.Grid do
   alias Muster.Game
   alias Muster.Game.Tile
 
-  @type t :: [Tile.t]
+  @type t :: [Tile.t()]
 
   @grid_size 6
 
@@ -32,11 +32,12 @@ defmodule Muster.Game.Grid do
   defp spaces(tiles) do
     indices = 0..(@grid_size - 1)
 
-    positions = Enum.flat_map(indices, fn row ->
-      Enum.map(indices, fn column ->
-        {row, column}
+    positions =
+      Enum.flat_map(indices, fn row ->
+        Enum.map(indices, fn column ->
+          {row, column}
+        end)
       end)
-    end)
 
     tile_positions = Enum.map(tiles, fn tile -> {tile.row, tile.column} end)
     positions -- tile_positions
@@ -51,7 +52,7 @@ defmodule Muster.Game.Grid do
     tiles
     |> rows()
     |> Enum.map(&move_tiles_in_row/1)
-    |> List.flatten
+    |> List.flatten()
   end
 
   def move_tiles(tiles, :right) do
@@ -78,19 +79,22 @@ defmodule Muster.Game.Grid do
   end
 
   defp rows(tiles) do
-    Enum.map(0..(@grid_size-1), fn row_index ->
+    Enum.map(0..(@grid_size - 1), fn row_index ->
       Enum.filter(tiles, fn tile -> tile.row == row_index end)
     end)
   end
 
-  @spec move_tiles_in_row([Tile.t], Tile.index()) :: [Tile.t]
+  @spec move_tiles_in_row([Tile.t()], Tile.index()) :: [Tile.t()]
   def move_tiles_in_row(row, current_column \\ 0) do
     case row do
       [] ->
         []
 
       [%{value: value} = tile | [%{value: value} | rest]] ->
-        [%Tile{row: tile.row, column: current_column, value: value * 2} | move_tiles_in_row(rest, current_column + 1)]
+        [
+          %Tile{row: tile.row, column: current_column, value: value * 2}
+          | move_tiles_in_row(rest, current_column + 1)
+        ]
 
       [tile | rest] ->
         [%{tile | column: current_column} | move_tiles_in_row(rest, current_column + 1)]

@@ -10,13 +10,13 @@ defmodule Muster.Game do
           current_player: player() | nil,
           grid: Grid.t(),
           next_id: Tile.id(),
-          merged_tiles: [Tile.t]
+          merged_tiles: [Tile.t()]
         }
 
   @type direction :: :left | :right | :up | :down
 
   @enforce_keys [:status, :grid]
-  defstruct [status: nil, grid: nil, next_id: 1, merged_tiles: [], players: [], current_player: nil]
+  defstruct status: nil, grid: nil, next_id: 1, merged_tiles: [], players: [], current_player: nil
 
   @first_tile 2
   @new_tile 1
@@ -37,11 +37,12 @@ defmodule Muster.Game do
   def add_player(%__MODULE__{status: :waiting_for_players} = game, player) do
     game = %{game | players: game.players ++ [player]}
 
-    game = if length(game.players) == @number_of_players do
-      %{game | status: :on, current_player: hd(game.players)}
-    else
-      game
-    end
+    game =
+      if length(game.players) == @number_of_players do
+        %{game | status: :on, current_player: hd(game.players)}
+      else
+        game
+      end
 
     {:ok, game}
   end
@@ -70,7 +71,7 @@ defmodule Muster.Game do
       |> Grid.put_ids(game.next_id)
 
     tile_ids = Enum.map(grid, & &1.id)
-    merged_tiles = Enum.filter(game.grid, & &1.id not in tile_ids)
+    merged_tiles = Enum.filter(game.grid, &(&1.id not in tile_ids))
 
     %{game | grid: grid, next_id: next_id, merged_tiles: game.merged_tiles ++ merged_tiles}
   end
@@ -106,7 +107,7 @@ defmodule Muster.Game do
 
   defp maybe_toggle_player(game) do
     if game.status == :on do
-      %{game | current_player: Enum.find(game.players, & &1 != game.current_player)}
+      %{game | current_player: Enum.find(game.players, &(&1 != game.current_player))}
     else
       game
     end

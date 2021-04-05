@@ -27,9 +27,11 @@ defmodule MusterWeb.GameMonitor do
   @impl true
   def handle_call(:demonitor, {pid, _ref}, processes) do
     {process, processes} = Map.pop(processes, pid)
+
     if process do
       Process.demonitor(process.ref)
     end
+
     {:reply, :ok, processes}
   end
 
