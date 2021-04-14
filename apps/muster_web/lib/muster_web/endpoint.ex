@@ -11,7 +11,7 @@ defmodule MusterWeb.Endpoint do
   ]
 
   socket("/socket", MusterWeb.UserSocket,
-    websocket: true,
+    websocket: [timeout: 45_000],
     longpoll: false
   )
 

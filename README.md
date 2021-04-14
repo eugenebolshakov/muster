@@ -5,6 +5,8 @@ This is a clone of the [game
 rules. I've called the game "Muster", as in "pass muster", because this is a
 test exercise.
 
+It's available at https://mustergame.herokuapp.com/
+
 ## Playing the game
 
 Please run ./start.sh to start the game. This script will attempt to use Docker
